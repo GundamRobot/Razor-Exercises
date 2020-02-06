@@ -8,6 +8,10 @@
 }
 
 @{
+    string artistId = "";
+    string artistName = "";
+    var dataBase = Database.Open("CHINOOK");
+
     var inputText = Request.Form["input-text"];
     var submitButton = Request.Form["submit-button"];
 
@@ -16,11 +20,31 @@
         if (submitButton.Equals("submit"))
         {
             <p>You clicked the submit button.</p>
+
+            var inputTextString = "%" + inputText + "%";
+            string querySQL = "SELECT ArtistId, Name FROM Artists WHERE Name LIKE @0 ORDER BY Name";
+            var resultingOutput = dataBase.Query(querySQL, inputTextString);
+
+
+            if(resultingOutput.Count() == 0)
+            {
+                <p>There are no records found.</p>
+                inputText = "";
+            }
+            else
+            {
+                Response.Redirect("Exercise02_B.cshtml?InputText=" + inputText);
+            }
         }
         else
         {
 
         }
+    }
+    else
+    {
+        <p>The database has not been queried.</p>
+        inputText = "";
     }
 }
 

@@ -6,3 +6,47 @@
 @section banner {
     <h1>@Page.Title</h1>
 }
+
+
+@{ 
+    var inputQueryString = Request.QueryString["InputText"];
+    var dataBase = Database.Open("CHINOOK");
+
+
+    if (string.IsNullOrEmpty(inputQueryString))
+    {
+        Response.Redirect("Exercise02_A.cshtml");
+    }
+
+    var inputTextString = "%" + inputQueryString + "%";
+    string querySQL = "SELECT ArtistId, Name FROM Artists WHERE Name LIKE @0 ORDER BY Name";
+    var resultingOutput = dataBase.Query(querySQL, inputTextString);
+
+    if(resultingOutput.Count() == 0)
+    {
+        <p>No records in the database.</p>
+    }
+    else
+    {
+        <p>There was @resultingOutput.Count() records returned from the database.</p>
+    }
+}
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Artist Name</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var row in resultingOutput)
+        {
+            <tr>
+                <td>@row.ArtistId</td>
+                <td>@row.Name</td>
+            </tr>
+        }
+    </tbody>
+</table>
