@@ -6,3 +6,39 @@
 @section banner {
     <h1>@Page.Title</h1>
 }
+
+@{ 
+    var dataBase = Database.Open("CHINOOK");
+
+    var artistQueryString = Request.QueryString["artistid"];
+
+    //var artistTextString = "%" + artistQueryString + "%";
+    string artistNameSQL = "SELECT Name FROM Artists WHERE ArtistId = @0 ";
+    var artistNameOutput = dataBase.Query(artistNameSQL, artistQueryString);
+    string artistAlbumsSQL = "SELECT AlbumId, Title, ReleaseYear, ReleaseLabel FROM Albums WHERE ArtistId = @0 ORDER BY Title";
+    var artistAlbumOutput = dataBase.Query(artistAlbumsSQL, artistQueryString);
+}
+
+
+<div class="container">
+    <h2>Album of </h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Released</th>
+                <th>Label</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in artistAlbumOutput)
+            {
+                <tr>
+                    <td>@row.ArtistId</td>
+                    <td>@row.Title</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
