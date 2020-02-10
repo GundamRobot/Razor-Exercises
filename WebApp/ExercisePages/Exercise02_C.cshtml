@@ -9,20 +9,20 @@
 
 @{ 
     var dataBase = Database.Open("CHINOOK");
-
-    var artistQueryString = Request.QueryString["artistid"];
+    
+    var artistIdString = Request.QueryString["artistid"];
 
     //var artistTextString = "%" + artistQueryString + "%";
-    string artistNameSQL = "SELECT Name FROM Artists WHERE ArtistId = @0 ";
-    var artistNameOutput = dataBase.Query(artistNameSQL, artistQueryString);
+    string artistNameSQL = "SELECT Name FROM Artists WHERE ArtistId = @0";
+    var artistNameOutput = dataBase.QueryValue(artistNameSQL, artistIdString);
     string artistAlbumsSQL = "SELECT AlbumId, Title, ReleaseYear, ReleaseLabel FROM Albums WHERE ArtistId = @0 ORDER BY Title";
-    var artistAlbumOutput = dataBase.Query(artistAlbumsSQL, artistQueryString);
+    var artistAlbumOutput = dataBase.Query(artistAlbumsSQL, artistIdString);
 }
 
 
 <div class="container">
-    <h2>Album of </h2>
-    <table>
+    <h2>Album of @artistNameOutput</h2>
+    <table class="table table-bordered table-hover">
         <thead>
             <tr>
                 <th>ID</th>
@@ -35,8 +35,10 @@
             @foreach (var row in artistAlbumOutput)
             {
                 <tr>
-                    <td>@row.ArtistId</td>
+                    <td>@row.AlbumId</td>
                     <td>@row.Title</td>
+                    <td>@row.ReleaseYear</td>
+                    <td>@row.ReleaseLabel</td>
                 </tr>
             }
         </tbody>

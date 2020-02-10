@@ -26,11 +26,15 @@
 
     if (resultingOutput.Count() == 0)
     {
-        <p>No records in the database.</p>
+        <div class="container">
+            <p>No records in the database.</p>
+        </div>
     }
     else
     {
-        <p>There was @resultingOutput.Count() records returned from the database.</p>
+        <div class="container">
+            <p>There was @resultingOutput.Count() records returned from the database.</p>
+        </div>
     }
 
     if (IsPost)
@@ -39,7 +43,9 @@
         {
             if (dropDownList.Equals(""))
             {
-                <p>Please select an option!</p>
+                <div class="container">
+                    <p>Please select an option!</p>
+                </div>
             }
             else
             {
