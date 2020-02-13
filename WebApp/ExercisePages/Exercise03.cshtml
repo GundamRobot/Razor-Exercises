@@ -17,7 +17,9 @@
     
     var database = Database.Open("CHINOOK");
 
+    // SQL to retrieve all the artist id's and the names alphabetically
     var artistListQuery = database.Query("SELECT ArtistId, Name FROM Artists ORDER BY Name");
+    var insertAlbumQuery = database.Query("INSERT INTO Albums (Title, ArtistId, ReleaseYear, ReleaseLabel) VALUES(@0, @1, @2, @3)");
 
     // When you have time, create a database query that will return the count of artists and then using ".QueryValue()".
     // Pass this value into the validator range in case if the database artist count increases dynamically rather than putting in 300.
