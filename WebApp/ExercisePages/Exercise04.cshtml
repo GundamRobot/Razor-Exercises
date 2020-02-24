@@ -6,3 +6,105 @@
 @section banner {
     <h1>@Page.Title</h1>
 }
+
+@{
+    var artist = "0";
+    var title = "";
+    var year = "0";
+    var musicLabel = "";
+
+    var buttonControl = Request.Form["button-control"];
+
+    var database = Database.Open("CHINOOK");
+
+    // SQL to retrieve all the artist id's and the names alphabetically
+    var artistListQuery = database.Query("SELECT ArtistId, Name FROM Artists ORDER BY Name");
+
+    // When you have time, create a database query that will return the count of artists and then using ".QueryValue()".
+    // Pass this value into the validator range in case if the database artist count increases dynamically rather than putting in 300.
+    Validation.Add("input-artist-list", Validator.Range(1, 300, "An artist needs to be selected"));
+    Validation.Add("input-title", Validator.Required("Album title is required"));
+    Validation.Add("input-year", Validator.Range(1950, 9999, "Year is a range from 1950 to present"));
+    Validation.Add("input-music-label", Validator.StringLength(50, 1, "Album label is limited to a max of 50 characters"));
+
+    if (IsPost)
+    {
+        artist = Request.Form["input-artist-list"];
+        title = Request.Form["input-title"];
+        year = Request.Form["input-year"];
+        musicLabel = Request.Form["input-music-label"];
+
+        if (buttonControl.Equals("Clear"))
+        {
+            //<p>Clear button pressed!</p>
+            artist = "0";
+            title = "";
+            year = "0";
+            musicLabel = "";
+        }
+        else
+        {
+            if (Validation.IsValid())
+            {
+                try
+                {
+                    
+                }
+                catch (Exception exception)
+                {
+                    <p>Error: @exception.Message</p>
+                }
+
+            }
+        }
+    }
+}
+
+<form id="album-form" class="form-signin" method="post">
+    <div class="text-center mb-4">
+        <h2 class="mb-3 font-weight-normal">Edit an Album</h2>
+    </div>
+    @Html.ValidationSummary()
+    @*<ul>
+            <li>Title is required</li>
+            <li>Year is a range from 1950 to present</li>
+            <li>Label is limited to 50 characters</li>
+        </ul>*@
+
+    <div class="form-group">
+        <label class="col-2 col-form-label" for="input-artist">Artist</label>
+        <select id="input-artist-list" name="input-artist-list" class="form-control">
+            <option value="0">Select an artist</option>
+            @foreach (var artistRow in artistListQuery)
+            {
+                if (artistRow.ArtistId.ToString() == artist)
+                {
+                    <option value="@artistRow[0]" selected>@artistRow[1]</option>
+                }
+                else
+                {
+                    <option value="@artistRow[0]">@artistRow[1]</option>
+                }
+            }
+        </select>
+    </div>
+
+    <div class="form-label-group">
+        <input type="text" id="input-title" class="form-control" name="input-title" placeholder="Title" value="@title">
+        <label for="inputEmail">Title</label>
+    </div>
+
+    <div class="form-label-group">
+        <input type="number" id="input-year" class="form-control" name="input-year" placeholder="Year" value="@year">
+        <label for="inputEmail">Year</label>
+    </div>
+
+    <div class="form-label-group">
+        <input type="text" id="input-music-label" class="form-control" name="input-music-label" placeholder="Music Label" value="@musicLabel">
+        <label for="inputEmail">Music Label</label>
+    </div>
+
+    <button id="add-button" class="btn btn btn-primary ml-0" name="button-control" value="Add">Add</button>
+    <button id="clear-button" class="btn btn btn-secondary" name="button-control" value="Clear">Clear</button>
+    <button id="delete-button" class="btn btn btn-danger" name="button-control" value="Delete">Delete</button>
+</form>
