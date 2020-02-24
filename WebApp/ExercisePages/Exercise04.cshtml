@@ -13,12 +13,18 @@
     var year = "0";
     var musicLabel = "";
 
-    var buttonControl = Request.Form["button-control"];
+    bool isSearch = false;
+
+
+    var buttonControl = Request.Form["button-control"];    
 
     var database = Database.Open("CHINOOK");
 
+    string albumQuery = "SELECT AlbumId, Title FROM Albums WHERE AlbumId = @0 ORDER BY Name";
+
     // SQL to retrieve all the artist id's and the names alphabetically
-    var artistListQuery = database.Query("SELECT ArtistId, Name FROM Artists ORDER BY Name");
+    var artistListSQL = "SELECT ArtistId, Name FROM Artists ORDER BY Name";
+    var artistListQuery = database.Query(artistListSQL, );
 
     // When you have time, create a database query that will return the count of artists and then using ".QueryValue()".
     // Pass this value into the validator range in case if the database artist count increases dynamically rather than putting in 300.
@@ -29,18 +35,19 @@
 
     if (IsPost)
     {
-        artist = Request.Form["input-artist-list"];
-        title = Request.Form["input-title"];
-        year = Request.Form["input-year"];
-        musicLabel = Request.Form["input-music-label"];
+        //artist = Request.Form["input-artist-list"];
+        //title = Request.Form["input-title"];
+        //year = Request.Form["input-year"];
+        //musicLabel = Request.Form["input-music-label"];
 
-        if (buttonControl.Equals("Clear"))
+        if (buttonControl.Equals("Search"))
         {
-            //<p>Clear button pressed!</p>
-            artist = "0";
-            title = "";
-            year = "0";
-            musicLabel = "";
+            isSearch = true;
+
+            //artist = "0";
+            //title = "";
+            //year = "0";
+            //musicLabel = "";
         }
         else
         {
@@ -48,7 +55,7 @@
             {
                 try
                 {
-                    
+
                 }
                 catch (Exception exception)
                 {
@@ -64,47 +71,72 @@
     <div class="text-center mb-4">
         <h2 class="mb-3 font-weight-normal">Edit an Album</h2>
     </div>
-    @Html.ValidationSummary()
-    @*<ul>
-            <li>Title is required</li>
-            <li>Year is a range from 1950 to present</li>
-            <li>Label is limited to 50 characters</li>
-        </ul>*@
 
-    <div class="form-group">
-        <label class="col-2 col-form-label" for="input-artist">Artist</label>
-        <select id="input-artist-list" name="input-artist-list" class="form-control">
-            <option value="0">Select an artist</option>
-            @foreach (var artistRow in artistListQuery)
-            {
-                if (artistRow.ArtistId.ToString() == artist)
-                {
-                    <option value="@artistRow[0]" selected>@artistRow[1]</option>
-                }
-                else
-                {
-                    <option value="@artistRow[0]">@artistRow[1]</option>
-                }
-            }
-        </select>
+    <div class="input-group">
+        <input type="text" id="input-text" class="form-control" name="input-text" placeholder="Enter an artist name" />
+        @*<label for="input-text">Enter an artist name</label>*@
+        <button type="submit" id="search-button" class="btn btn-primary ml-2" name="button-control" value="Search">Search</button>
     </div>
 
-    <div class="form-label-group">
-        <input type="text" id="input-title" class="form-control" name="input-title" placeholder="Title" value="@title">
-        <label for="inputEmail">Title</label>
-    </div>
+    @{
+        if (isSearch == true)
+        {
+            <div class="form-group">
+                <label class="col-2 col-form-label" for="input-artist">Artist</label>
+                <select id="input-artist-list" name="input-artist-list" class="form-control">
+                    <option value="0">Select an artist</option>
+                    @foreach (var artistRow in artistListQuery)
+                    {
+                        if (artistRow.ArtistId.ToString() == artist)
+                        {
+                            <option value="@artistRow[0]" selected>@artistRow[1]</option>
+                        }
+                        else
+                        {
+                            <option value="@artistRow[0]">@artistRow[1]</option>
+                        }
+                    }
+                </select>
+            </div>
 
-    <div class="form-label-group">
-        <input type="number" id="input-year" class="form-control" name="input-year" placeholder="Year" value="@year">
-        <label for="inputEmail">Year</label>
-    </div>
+            @*@Html.ValidationSummary()
+                <div class="form-group">
+                    <label class="col-2 col-form-label" for="input-artist">Album</label>
+                    <select id="input-artist-list" name="input-artist-list" class="form-control">
+                        <option value="0">Select an album</option>
+                        @foreach (var artistRow in artistListQuery)
+                        {
+                            if (artistRow.ArtistId.ToString() == artist)
+                            {
+                                <option value="@artistRow[0]" selected>@artistRow[1]</option>
+                            }
+                            else
+                            {
+                                <option value="@artistRow[0]">@artistRow[1]</option>
+                            }
+                        }
+                    </select>
+                </div>
 
-    <div class="form-label-group">
-        <input type="text" id="input-music-label" class="form-control" name="input-music-label" placeholder="Music Label" value="@musicLabel">
-        <label for="inputEmail">Music Label</label>
-    </div>
+                <div class="form-label-group">
+                    <input type="text" id="input-title" class="form-control" name="input-title" placeholder="Title" value="@title">
+                    <label for="inputEmail">Title</label>
+                </div>
 
-    <button id="add-button" class="btn btn btn-primary ml-0" name="button-control" value="Add">Add</button>
-    <button id="clear-button" class="btn btn btn-secondary" name="button-control" value="Clear">Clear</button>
-    <button id="delete-button" class="btn btn btn-danger" name="button-control" value="Delete">Delete</button>
+                <div class="form-label-group">
+                    <input type="number" id="input-year" class="form-control" name="input-year" placeholder="Year" value="@year">
+                    <label for="inputEmail">Year</label>
+                </div>
+
+                <div class="form-label-group">
+                    <input type="text" id="input-music-label" class="form-control" name="input-music-label" placeholder="Music Label" value="@musicLabel">
+                    <label for="inputEmail">Music Label</label>
+                </div>
+
+                <div class="form-label-group mt-2 text-center">
+                    <button id="add-button" class="btn btn btn-secondary ml-0" name="button-control" value="Add">Edit</button>
+                    <button id="delete-button" class="btn btn btn-danger" name="button-control" value="Delete">Delete</button>
+                </div>*@
+        }
+    }
 </form>
