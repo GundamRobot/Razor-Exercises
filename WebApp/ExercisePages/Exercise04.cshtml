@@ -8,8 +8,6 @@
 }
 
 @{
-
-
     var database = Database.Open("CHINOOK");
 
     var inputText = Request.Form["input-text"];
@@ -18,9 +16,7 @@
     var inputTextString = "%" + inputText + "%";
     string artistListSQL = "SELECT ArtistId, Name FROM Artists WHERE Name LIKE @0";
     var artistListOutput = database.Query(artistListSQL, inputTextString);
-
-    
-
+   
     if (IsPost)
     {
 
