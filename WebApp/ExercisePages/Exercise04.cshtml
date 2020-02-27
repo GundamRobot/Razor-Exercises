@@ -10,10 +10,6 @@
 @{
 
 
-    bool isSearch = false;
-    bool isArtistSelected = false;
-    string displayDropDown = "none";
-
     var database = Database.Open("CHINOOK");
 
     var inputText = Request.Form["input-text"];
@@ -27,11 +23,7 @@
 
     if (IsPost)
     {
-        var dropDownList = Request.Form["album-list"];
-        var fetchAlbumsButton = Request.Form["fetch-albums"];
 
-        string artistAlbumsSQL = "SELECT AlbumId, Title, ReleaseYear, ReleaseLabel FROM Albums WHERE ArtistId = @0 ORDER BY Title";
-        var artistAlbumOutput = database.Query(artistAlbumsSQL, dropDownList);
 
         if (string.IsNullOrEmpty(inputText))
         {
@@ -41,25 +33,21 @@
         {
             if (buttonControl.Equals("Search"))
             {
-                isSearch = true;
-                displayDropDown = "block";
+                if (artistListOutput.Count() == 0)
+                {
+                    <p>There are no records found.</p>
+                    inputText = "";
+                }
+                else
+                {
+                    Response.Redirect("Exercise04_ArtistList.cshtml?InputText=" + inputText);
+                }
             }
             else
             {
 
             }
 
-        }
-        if (fetchAlbumsButton.Equals("fetch-albums"))
-        {
-            if (dropDownList.Equals(""))
-            {
-
-            }
-            else
-            {
-                isArtistSelected = true;
-            }
         }
     }
 }
@@ -74,55 +62,4 @@
         @*<label for="input-text">Enter an artist name</label>*@
         <button type="submit" id="search-button" class="btn btn-primary ml-2" name="button-control" value="Search">Search</button>
     </div>
-
-    <div class="container" style="display: @displayDropDown">
-        <div class="col-md-6">
-            <form class="form-inline" method="post">
-                <div class="form-group">
-                    <select id="album-list" name="album-list" class="form-control">
-                        <option value="">Select an Artist</option>
-                        @foreach (var row in artistListOutput)
-                        {
-                            <option value="@row.ArtistId">@row.Name</option>
-                        }
-                    </select>
-                </div>
-                <div class="form-group ml-2">
-                    <button type="submit" id="fetch-albums" class="btn btn-primary margin" name="fetch-albums" value="fetch-albums">Fetch Albums</button>
-                </div>
-            </form>
-        </div>
-    </div>
 </form>
-@{
-
-    
-
-    if (isArtistSelected == true)
-    {
-    <div class="container">
-        <h2>List of artists</h2>
-        <table class="table table-bordered table-hover">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Released</th>
-                    <th>Label</th>
-                </tr>
-            </thead>
-            <tbody>
-                @*@foreach (var row in artistAlbumOutput)
-                {
-                    <tr>
-                        <td>@row.AlbumId</td>
-                        <td>@row.Title</td>
-                        <td>@row.ReleaseYear</td>
-                        <td>@row.ReleaseLabel</td>
-                    </tr>
-                }*@
-            </tbody>
-        </table>
-    </div>
-    }
-}

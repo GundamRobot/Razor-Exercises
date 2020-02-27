@@ -1,0 +1,86 @@
+﻿@{
+    Layout = "~/_Layout.cshtml";
+    Page.Title = string.Format("Razor - {0}", "Exercise 04");
+}
+
+@section banner {
+    <h1>@Page.Title</h1>
+}
+
+@{
+
+
+    var database = Database.Open("CHINOOK");
+
+    var inputQueryString = Request.QueryString["InputText"];
+
+    var dropDownList = Request.Form["album-list"];
+    var fetchAlbumsButton = Request.Form["fetch-albums"];
+
+    var inputTextString = "%" + inputQueryString + "%";
+    string artistListSQL = "SELECT ArtistId, Name FROM Artists WHERE Name LIKE @0";
+    var artistListOutput = database.Query(artistListSQL, inputTextString);
+
+    if (string.IsNullOrEmpty(inputQueryString))
+    {
+        Response.Redirect("Exercise04.cshtml");
+    }
+
+    if (artistListOutput.Count() == 0)
+    {
+        <div class="container">
+            <p>No records in the database.</p>
+        </div>
+    }
+    else
+    {
+        <div class="container">
+            <p>There was @artistListOutput.Count() records returned from the database.</p>
+        </div>
+    }
+
+    if (IsPost)
+    {
+        if (fetchAlbumsButton.Equals("fetch-albums"))
+        {
+            if (dropDownList.Equals(""))
+            {
+                <div class="container">
+                    <p>Please select an option!</p>
+                </div>
+            }
+            else
+            {
+                //<p>Button was clicked!</p>
+                Response.Redirect("Exercise02_C.cshtml?artistid=" + dropDownList);
+            }
+        }
+        else
+        {
+
+        }
+    }
+    else
+    {
+
+    }
+}
+
+<div class="container">
+    <div class="col-md-6">
+        <form class="form-inline" method="post">
+            <div class="form-group">
+                <select id="album-list" name="album-list" class="form-control">
+                    <option value="">Select an Artist</option>
+                    @foreach (var row in artistListOutput)
+                    {
+                        <option value="@row.ArtistId">@row.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group ml-2">
+                <button type="submit" id="fetch-albums" class="btn btn-primary margin" name="fetch-albums" value="fetch-albums">Fetch Albums</button>
+            </div>
+        </form>
+    </div>
+</div>
