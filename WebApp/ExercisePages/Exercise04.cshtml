@@ -8,60 +8,57 @@
 }
 
 @{
-    var artist = "0";
-    var title = "";
-    var year = "0";
-    var musicLabel = "";
+
 
     bool isSearch = false;
-
-
-    var buttonControl = Request.Form["button-control"];    
+    bool isArtistSelected = false;
+    string displayDropDown = "none";
 
     var database = Database.Open("CHINOOK");
 
-    string albumQuery = "SELECT AlbumId, Title FROM Albums WHERE AlbumId = @0 ORDER BY Name";
+    var inputText = Request.Form["input-text"];
+    var buttonControl = Request.Form["button-control"];    
 
-    // SQL to retrieve all the artist id's and the names alphabetically
-    var artistListSQL = "SELECT ArtistId, Name FROM Artists ORDER BY Name";
-    var artistListQuery = database.Query(artistListSQL, );
+    var inputTextString = "%" + inputText + "%";
+    string artistListSQL = "SELECT ArtistId, Name FROM Artists WHERE Name LIKE @0";
+    var artistListOutput = database.Query(artistListSQL, inputTextString);
 
-    // When you have time, create a database query that will return the count of artists and then using ".QueryValue()".
-    // Pass this value into the validator range in case if the database artist count increases dynamically rather than putting in 300.
-    Validation.Add("input-artist-list", Validator.Range(1, 300, "An artist needs to be selected"));
-    Validation.Add("input-title", Validator.Required("Album title is required"));
-    Validation.Add("input-year", Validator.Range(1950, 9999, "Year is a range from 1950 to present"));
-    Validation.Add("input-music-label", Validator.StringLength(50, 1, "Album label is limited to a max of 50 characters"));
+    
 
     if (IsPost)
     {
-        //artist = Request.Form["input-artist-list"];
-        //title = Request.Form["input-title"];
-        //year = Request.Form["input-year"];
-        //musicLabel = Request.Form["input-music-label"];
+        var dropDownList = Request.Form["album-list"];
+        var fetchAlbumsButton = Request.Form["fetch-albums"];
 
-        if (buttonControl.Equals("Search"))
+        string artistAlbumsSQL = "SELECT AlbumId, Title, ReleaseYear, ReleaseLabel FROM Albums WHERE ArtistId = @0 ORDER BY Title";
+        var artistAlbumOutput = database.Query(artistAlbumsSQL, dropDownList);
+
+        if (string.IsNullOrEmpty(inputText))
         {
-            isSearch = true;
-
-            //artist = "0";
-            //title = "";
-            //year = "0";
-            //musicLabel = "";
+            <p>Please input a name!</p>
         }
         else
         {
-            if (Validation.IsValid())
+            if (buttonControl.Equals("Search"))
             {
-                try
-                {
+                isSearch = true;
+                displayDropDown = "block";
+            }
+            else
+            {
 
-                }
-                catch (Exception exception)
-                {
-                    <p>Error: @exception.Message</p>
-                }
+            }
 
+        }
+        if (fetchAlbumsButton.Equals("fetch-albums"))
+        {
+            if (dropDownList.Equals(""))
+            {
+
+            }
+            else
+            {
+                isArtistSelected = true;
             }
         }
     }
@@ -78,65 +75,54 @@
         <button type="submit" id="search-button" class="btn btn-primary ml-2" name="button-control" value="Search">Search</button>
     </div>
 
-    @{
-        if (isSearch == true)
-        {
-            <div class="form-group">
-                <label class="col-2 col-form-label" for="input-artist">Artist</label>
-                <select id="input-artist-list" name="input-artist-list" class="form-control">
-                    <option value="0">Select an artist</option>
-                    @foreach (var artistRow in artistListQuery)
-                    {
-                        if (artistRow.ArtistId.ToString() == artist)
-                        {
-                            <option value="@artistRow[0]" selected>@artistRow[1]</option>
-                        }
-                        else
-                        {
-                            <option value="@artistRow[0]">@artistRow[1]</option>
-                        }
-                    }
-                </select>
-            </div>
-
-            @*@Html.ValidationSummary()
+    <div class="container" style="display: @displayDropDown">
+        <div class="col-md-6">
+            <form class="form-inline" method="post">
                 <div class="form-group">
-                    <label class="col-2 col-form-label" for="input-artist">Album</label>
-                    <select id="input-artist-list" name="input-artist-list" class="form-control">
-                        <option value="0">Select an album</option>
-                        @foreach (var artistRow in artistListQuery)
+                    <select id="album-list" name="album-list" class="form-control">
+                        <option value="">Select an Artist</option>
+                        @foreach (var row in artistListOutput)
                         {
-                            if (artistRow.ArtistId.ToString() == artist)
-                            {
-                                <option value="@artistRow[0]" selected>@artistRow[1]</option>
-                            }
-                            else
-                            {
-                                <option value="@artistRow[0]">@artistRow[1]</option>
-                            }
+                            <option value="@row.ArtistId">@row.Name</option>
                         }
                     </select>
                 </div>
-
-                <div class="form-label-group">
-                    <input type="text" id="input-title" class="form-control" name="input-title" placeholder="Title" value="@title">
-                    <label for="inputEmail">Title</label>
+                <div class="form-group ml-2">
+                    <button type="submit" id="fetch-albums" class="btn btn-primary margin" name="fetch-albums" value="fetch-albums">Fetch Albums</button>
                 </div>
-
-                <div class="form-label-group">
-                    <input type="number" id="input-year" class="form-control" name="input-year" placeholder="Year" value="@year">
-                    <label for="inputEmail">Year</label>
-                </div>
-
-                <div class="form-label-group">
-                    <input type="text" id="input-music-label" class="form-control" name="input-music-label" placeholder="Music Label" value="@musicLabel">
-                    <label for="inputEmail">Music Label</label>
-                </div>
-
-                <div class="form-label-group mt-2 text-center">
-                    <button id="add-button" class="btn btn btn-secondary ml-0" name="button-control" value="Add">Edit</button>
-                    <button id="delete-button" class="btn btn btn-danger" name="button-control" value="Delete">Delete</button>
-                </div>*@
-        }
-    }
+            </form>
+        </div>
+    </div>
 </form>
+@{
+
+    
+
+    if (isArtistSelected == true)
+    {
+    <div class="container">
+        <h2>List of artists</h2>
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Released</th>
+                    <th>Label</th>
+                </tr>
+            </thead>
+            <tbody>
+                @*@foreach (var row in artistAlbumOutput)
+                {
+                    <tr>
+                        <td>@row.AlbumId</td>
+                        <td>@row.Title</td>
+                        <td>@row.ReleaseYear</td>
+                        <td>@row.ReleaseLabel</td>
+                    </tr>
+                }*@
+            </tbody>
+        </table>
+    </div>
+    }
+}
