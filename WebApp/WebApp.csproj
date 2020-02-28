@@ -134,6 +134,7 @@
     <Content Include="Scripts\esm\popper-utils.js.map" />
     <Content Include="ExercisePages\Exercise04_ArtistList.cshtml" />
     <Content Include="ExercisePages\Exercise04_AlbumList.cshtml" />
+    <Content Include="ExercisePages\Exercise04_EditAlbum.cshtml" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />

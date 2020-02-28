@@ -1,0 +1,109 @@
+﻿@{
+    Layout = "~/_Layout.cshtml";
+    Page.Title = string.Format("Razor - {0}", "Exercise 04");
+}
+
+@section banner {
+    <h1>@Page.Title</h1>
+}
+
+@{
+    var dataBase = Database.Open("CHINOOK");
+
+    var albumIdString = Request.QueryString["albumid"];
+
+    // Form elements requests
+    var buttonControl = Request.Form["button-control"];
+    var title = Request.Form["input-title"];
+    var year = Request.Form["input-year"];
+    var musicLabel = Request.Form["input-music-label"];
+
+    // Retrieve title, year, and label of the album based on what is being edited (query string)
+    string artistAlbumsSQL = "SELECT AlbumId, Title, ArtistId, ReleaseYear, ReleaseLabel FROM Albums WHERE AlbumId = @0";
+    var artistAlbumOutput = dataBase.QuerySingle(artistAlbumsSQL, albumIdString);
+
+    // Updates the changes with the edited information
+    string editAlbumSQL = "UPDATE Albums SET Title = @0, ArtistId = @1, ReleaseYear = @2, ReleaseLabel = @3 WHERE AlbumId = @4";    
+
+    // Deletes album based on Album ID
+    string deleteAlbumSQL = "DELETE Albums WHERE AlbumId = @0";
+
+    // Validation
+
+    Validation.Add("input-title", Validator.Required("Album title is required"));
+    Validation.Add("input-year", Validator.Range(1950, 9999, "Year is a range from 1950 to present"));
+    Validation.Add("input-music-label", Validator.StringLength(50, 1, "Album label is limited to a max of 50 characters"));
+
+    if (IsPost)
+    {
+        if (buttonControl.Equals("Edit"))
+        {
+            @*<p>Edit button pressed!</p>*@
+
+            if (Validation.IsValid())
+            {
+                try
+                {
+                    // Insert edit functionality here
+                    dataBase.Query(editAlbumSQL, string.IsNullOrEmpty(title) ? null : title, artistAlbumOutput.ArtistId, string.IsNullOrEmpty(year) ? null : year, string.IsNullOrEmpty(musicLabel) ? null : musicLabel, albumIdString);
+                    <p>Album has been edited!</p>
+                }
+                catch (Exception exception)
+                {
+                    <p>Error: @exception.Message</p>
+                }
+            }
+        }
+        else
+        {
+            dataBase.Query(deleteAlbumSQL, albumIdString);
+            <p>Delete button pressed!</p>
+        }
+    }
+
+}
+
+<form id="album-form" class="form-signin" method="post">
+
+
+    <div class="text-center mb-4">
+        <h2 class="mb-3 font-weight-normal">Edit Album: @artistAlbumOutput.Title</h2>
+    </div>
+
+    @Html.ValidationSummary()
+
+    <p>Artist ID: @artistAlbumOutput.ArtistId</p>
+
+    <div class="form-label-group">
+        <input type="text" id="input-title" class="form-control" name="input-title" placeholder="Title" value="@artistAlbumOutput.Title">
+        <label for="inputEmail">Title</label>
+    </div>
+
+    <div class="form-label-group">
+        <input type="number" id="input-year" class="form-control" name="input-year" placeholder="Year" value="@artistAlbumOutput.ReleaseYear">
+        <label for="inputEmail">Year</label>
+    </div>
+
+    <div class="form-label-group">
+        <input type="text" id="input-music-label" class="form-control" name="input-music-label" placeholder="Music Label" value="@artistAlbumOutput.ReleaseLabel">
+        <label for="inputEmail">Music Label</label>
+    </div>
+
+    <button id="edit-button" class="btn btn btn-primary ml-0" name="button-control" value="Edit">Edit</button>
+    <button id="delete-button" class="btn btn btn-secondary" name="button-control" value="Delete">Delete</button>
+</form>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        // Delete prompt when user clicks the delete button
+        $("#delete-button").click(function () {
+            confirm("Are you sure you want to delete this album?");
+        });
+
+        // Testing
+        $("p").click(function () {
+            confirm("Testing");
+            $(this).hide();
+        });
+    });
+</script>
